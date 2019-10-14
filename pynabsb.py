@@ -11,7 +11,7 @@ import csv
 FIELD_NAMES = ["Date", "Payee", "Memo", "Outflow", "Inflow"]
 
 
-def parse_sb_csv(csvpath, delimiter=";"):
+def parse_sb_csv(csvpath, delimiter=","):
     """Reads a Swedbank CSV export and parses it into a JSON array
     compatible with YNAB.
     """
@@ -20,10 +20,10 @@ def parse_sb_csv(csvpath, delimiter=";"):
         reader = csv.reader(csvfile, delimiter=delimiter)
         for row in reader:
             transaction = {
-                "Date": row[1],
-                "Payee": row[0],
-                "Inflow": row[2] if not row[2][0] == '-' else "",
-                "Outflow": row[2] if row[2][0] == '-' else "",
+                "Date": row[6],
+                "Payee": row[8],
+                "Inflow": row[10] if not row[10][0] == '-' else "",
+                "Outflow": row[10] if row[10][0] == '-' else "",
                 "Memo": ""
             }
             result.append(transaction)
@@ -40,6 +40,8 @@ def convert_sb_data(data, outfile, delimiter=",", header=True, date_filter=""):
         if header:
             writer.writeheader()
         for row in data:
+            if "Transaktionsdag" in row["Date"]:
+                continue
             if date_filter:
                 if not date_filter in row["Date"]:
                     continue
